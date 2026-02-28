@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Budgets — FinanceApp{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Budgets</h1>
+      <p class="text-sm text-gray-500 mt-0.5">{{ month_name }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- Prev / Next month navigation -->
+      <a href="?month={{ prev_month }}&year={{ prev_year }}"
+         class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50">&larr;</a>
+      <a href="?month={{ next_month }}&year={{ next_year }}"
+         class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50">&rarr;</a>
+      <a href="{% url 'budget_create' %}"
+         class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
+        + Add Budget
+      </a>
+    </div>
+  </div>
+
+  {% if budgets %}
+  <div class="space-y-3">
+    {% for budget in budgets %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ budget.category_color }}"></span>
+          <span class="font-medium text-gray-900">{{ budget.category_name }}</span>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="text-sm font-semibold
+                       {% if budget.percent >= 100 %}text-red-600
+                       {% elif budget.percent >= 80 %}text-yellow-600
+                       {% else %}text-gray-700{% endif %}">
+            €{{ budget.spent|floatformat:2 }} / €{{ budget.amount|floatformat:2 }}
+          </span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full
+                       {% if budget.percent >= 100 %}bg-red-100 text-red-700
+                       {% elif budget.percent >= 80 %}bg-yellow-100 text-yellow-700
+                       {% else %}bg-green-100 text-green-700{% endif %}">
+            {{ budget.percent }}%
+          </span>
+          <a href="{% url 'budget_update' budget.id %}" class="text-xs text-indigo-600 hover:text-indigo-800">Edit</a>
+          <a href="{% url 'budget_delete' budget.id %}" class="text-xs text-red-600 hover:text-red-800">Delete</a>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div class="w-full bg-gray-100 rounded-full h-2.5">
+        <div class="h-2.5 rounded-full transition-all
+                    {% if budget.percent >= 100 %}bg-red-500
+                    {% elif budget.percent >= 80 %}bg-yellow-400
+                    {% else %}bg-green-500{% endif %}"
+             style="width: {% if budget.percent > 100 %}100{% else %}{{ budget.percent }}{% endif %}%">
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-12 text-center">
+    <p class="text-gray-500">No budgets for {{ month_name }}.</p>
+    <a href="{% url 'budget_create' %}" class="mt-2 inline-block text-indigo-600 hover:underline text-sm">Add your first budget</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
